@@ -252,7 +252,7 @@ ol.parser.WKB.prototype.readBytesToUInt32_ = function(str) {
     data[this.byteOrder_ ? 3 - i : i] = str[i + this.index_];
   }
   var result = ((data[0] << 24) + (data[1] << 16) +
-              (data[2] << 8) + (data[3] << 0));
+            (data[2] << 8) + (data[3] << 0));
   this.index_ += 4;
   return result;
 };
@@ -280,12 +280,12 @@ ol.parser.WKB.prototype.readBytesToDouble_ = function(str) {
   }
   var mul = Math.pow(2, exponent - 1023 - 52);
   var mantissa = data[7] +
-                     data[6] * Math.pow(2, 8 * 1) +
-                     data[5] * Math.pow(2, 8 * 2) +
-                     data[4] * Math.pow(2, 8 * 3) +
-                     data[3] * Math.pow(2, 8 * 4) +
-                     data[2] * Math.pow(2, 8 * 5) +
-                     (data[1] & 15) * Math.pow(2, 8 * 6) + Math.pow(2, 52);
+                    data[6] * Math.pow(2, 8 * 1) +
+                    data[5] * Math.pow(2, 8 * 2) +
+                    data[4] * Math.pow(2, 8 * 3) +
+                    data[3] * Math.pow(2, 8 * 4) +
+                    data[2] * Math.pow(2, 8 * 5) +
+                    (data[1] & 15) * Math.pow(2, 8 * 6) + Math.pow(2, 52);
   var result = Math.pow(-1, sign) * mantissa * mul;
   this.index_ += 8;
   return result;
