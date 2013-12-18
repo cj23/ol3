@@ -29,7 +29,7 @@ goog.addSingletonGetter(ol.parser.WKB);
 
 /**
  * Points to current index in WKB byte array.
- * @type {int}
+ * @type {number} Integer
  * @private
  */
 ol.parser.WKB.prototype.index_ = 0;
@@ -37,14 +37,14 @@ ol.parser.WKB.prototype.index_ = 0;
 
 /**
  * Sets the byte order to read byte stream (0-Big Endian, 1-Little Endian).
- * @type {int}
+ * @type {number} Integer
  * @private
  */
 ol.parser.WKB.prototype.byteOrder_ = 0;
 
 
 /**
- * @param {byte[]} str WKB point.
+ * @param {Array.<number>} str WKB point.
  * @return {ol.geom.Point} Parsed point.
  * @private
  */
@@ -57,7 +57,7 @@ ol.parser.WKB.prototype.parsePoint_ = function(str) {
 
 
 /**
- * @param {byte[]} str WKB linestring.
+ * @param {Array.<number>} str WKB linestring.
  * @return {ol.geom.LineString} Parsed linestring.
  * @private
  */
@@ -72,7 +72,7 @@ ol.parser.WKB.prototype.parseLineString_ = function(str) {
 
 
 /**
- * @param {byte[]} str WKB multipoint.
+ * @param {Array.<number>} str WKB multipoint.
  * @return {ol.geom.MultiPoint} Parsed multipoint.
  * @private
  */
@@ -87,7 +87,7 @@ ol.parser.WKB.prototype.parseMultiPoint_ = function(str) {
 
 
 /**
- * @param {byte[]} str WKB multilinestring.
+ * @param {Array.<number>} str WKB multilinestring.
  * @return {ol.geom.MultiLineString} Parsed multilinestring.
  * @private
  */
@@ -102,7 +102,7 @@ ol.parser.WKB.prototype.parseMultiLineString_ = function(str) {
 
 
 /**
- * @param {byte[]} str WKB polygon.
+ * @param {Array.<number>} str WKB polygon.
  * @return {ol.geom.Polygon} Parsed polygon.
  * @private
  */
@@ -117,7 +117,7 @@ ol.parser.WKB.prototype.parsePolygon_ = function(str) {
 
 
 /**
- * @param {byte[]} str WKB multipolygon.
+ * @param {Array.<number>} str WKB multipolygon.
  * @return {ol.geom.MultiPolygon} Parsed multipolygon.
  * @private
  */
@@ -132,7 +132,7 @@ ol.parser.WKB.prototype.parseMultiPolygon_ = function(str) {
 
 
 /**
- * @param {byte[]} str WKB geometrycollection.
+ * @param {Array.<number>} str WKB geometrycollection.
  * @return {ol.geom.GeometryCollection} Parsed geometrycollection.
  * @private
  */
@@ -148,7 +148,7 @@ ol.parser.WKB.prototype.parseGeometryCollection_ = function(str) {
 
 /**
  * Parse WKB binary data.
- * @param {byte[]} str WKB data.
+ * @param {Array.<number>} str WKB data.
  * @return {ol.geom.Geometry|ol.geom.GeometryCollection|undefined}
  *     The geometry created.
  * @private
@@ -156,6 +156,7 @@ ol.parser.WKB.prototype.parseGeometryCollection_ = function(str) {
 ol.parser.WKB.prototype.parse_ = function(str) {
   this.byteOrder_ = this.readBytesToUInt8_(str);
   var type = this.readBytesToUInt32_(str);
+  var geometry;
   switch (type) {
     case 0001:
       geometry = this.parsePoint_(str);
@@ -187,7 +188,7 @@ ol.parser.WKB.prototype.parse_ = function(str) {
 
 /**
  * Parse a WKB string.
- * @param {byte[]} str WKB byte array.
+ * @param {Array.<number>} str WKB byte array.
  * @return {ol.geom.Geometry|undefined} Parsed geometry.
  */
 ol.parser.WKB.prototype.readWKB = function(str) {
@@ -208,6 +209,24 @@ ol.parser.WKB.prototype.read = function(str) {
 
 
 /**
+ * Parse a WKB document provided as a string.
+ * @param {string} str WKT document Base64 Encoded.
+ * @return {ol.parser.ReadFeaturesResult} Features and metadata.
+ */
+ol.parser.WKB.prototype.readFeaturesFromString = function(str) {
+  var geom = this.read(str);
+  var obj = /** @type {ol.parser.ReadFeaturesResult} */
+      ({});
+  if (goog.isDef(geom)) {
+    var feature = new ol.Feature();
+    feature.setGeometry(geom);
+    obj.features = [feature];
+  }
+  return obj;
+};
+
+
+/**
  * Parse a Base64 encoded WKB string.
  * @param {string} str Base64 encoded WKB string.
  * @return {ol.geom.Geometry|undefined} Parsed geometry.
@@ -223,8 +242,8 @@ ol.parser.WKB.read = function(str) {
 
 /**
  * Read single byte in stream at current index.
- * @param {byte[]} str byte array.
- * @return {UInt8} Unsigned 8-bit Integer.
+ * @param {Array.<number>} str Byte array.
+ * @return {number} Unsigned 8-bit Integer.
  * @private
  */
 ol.parser.WKB.prototype.readBytesToUInt8_ = function(str) {
@@ -239,8 +258,8 @@ ol.parser.WKB.prototype.readBytesToUInt8_ = function(str) {
 
 /**
  * Read 4 bytes in stream at current index.
- * @param {byte[]} str byte array.
- * @return {UInt32} Unsigned 32-bit Integer.
+ * @param {Array.<number>} str Byte array.
+ * @return {number} Unsigned 32-bit Integer.
  * @private
  */
 ol.parser.WKB.prototype.readBytesToUInt32_ = function(str) {
@@ -260,8 +279,8 @@ ol.parser.WKB.prototype.readBytesToUInt32_ = function(str) {
 
 /**
  * Read 8 bytes in stream at current index.
- * @param {byte[]} str byte array.
- * @return {Double} Double precision float.
+ * @param {Array.<number>} str Byte array.
+ * @return {number} Double precision float.
  * @private
  */
 ol.parser.WKB.prototype.readBytesToDouble_ = function(str) {
@@ -295,11 +314,11 @@ ol.parser.WKB.prototype.readBytesToDouble_ = function(str) {
 /**
  * Decode Base64 input to byte array.
  * @param {string} str Base64 encoded data.
- * @return {byte[]} Decoded data.
+ * @return {Array.<number>} Decoded data.
  * @private
  */
 ol.parser.WKB.prototype.decodeBase64_ = function(str) {
-  str = atob(str);
+  str = window.atob(str);
   var bytes = [];
   for (var i = 0; i < str.length; ++i)
   {
