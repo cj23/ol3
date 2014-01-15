@@ -342,6 +342,7 @@ ol.parser.WKB.prototype.encode_ = function(geom) {
 ol.parser.WKB.prototype.read = function(str) {
   if (typeof str === 'string') {
     str = this.decodeBase64_(str);
+    console.log('decoding string');
   }
   this.index_ = 0;
   return this.parse_(str);
