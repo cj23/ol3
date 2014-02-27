@@ -1,0 +1,102 @@
+goog.require('ol.Feature');
+goog.require('ol.Map');
+goog.require('ol.RendererHint');
+goog.require('ol.View2D');
+goog.require('ol.layer.Tile');
+goog.require('ol.layer.Vector');
+goog.require('ol.proj');
+goog.require('ol.source.Vector');
+goog.require('ol.parser.WKT');
+goog.require('ol.parser.WKB');
+goog.require('ol.parser.GeoJSON');
+
+var which = (['WKT','WKB','GJSN'])[0];
+var tr =                           1;
+var test = {
+    Tests: (1+tr)*10,
+    Test : 1+(tr*10),
+    Runs : 5,
+    Run  : 1
+  };
+  
+function initMap(vecData) {
+
+  var parser;
+  if (which === 'WKT')
+    parser = new ol.parser.WKT();
+  else if (which === 'WKB')
+    parser = new ol.parser.WKB();
+  else
+    parser = new ol.parser.GeoJSON();
+    
+  var geom = parser.read(vecData);
+  timer.tParsed = performance.now();
+  
+  testEnd();
+}
+
+function getBinaryData(url, json, whenReadyFunction) {
+  var xhr = new XMLHttpRequest();
+  xhr.open("POST", url, true); 
+  xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+  if (which === 'WKB')
+    xhr.responseType = "arraybuffer";
+  xhr.onload = function (xhrEvent) {
+    timer.tLoaded = performance.now();
+    var resp;
+    if (which === 'WKB')
+      resp = new Uint8Array(xhr.response);
+    else
+      resp = xhr.responseText;
+    whenReadyFunction.apply(this, [resp]);
+  };
+  timer.tStart = performance.now();
+  var params = "data="+JSON.stringify(json);
+  xhr.send(params);
+}
+
+var timer = {};
+var url = "http://localhost:8084/WKBExtract/get"+which;
+var data = {wkb: "(st_transform(the_geom, 3857))", id: 672};
+if (which === 'WKT')
+  data.wkb = "st_AsText" + data.wkb;
+else if(which === 'WKB')
+  data.wkb = "st_AsBinary" + data.wkb;
+else
+  data.wkb = "st_AsGeoJSON" + data.wkb;
+  
+timer.sLoad = 9999;timer.sParse = 9999;timer.sTotal = 9999;  
+function testStart() {
+  data.id = test.Test;  
+  //document.getElementById("map").innerHTML = ''; // clear the map
+  getBinaryData(url, data, initMap);
+}
+
+function testEnd() {
+  timer.tEnd = performance.now();
+
+  if ((timer.tLoaded - timer.tStart) < timer.sLoad)
+    timer.sLoad = (timer.tLoaded - timer.tStart);
+  if ((timer.tParsed - timer.tLoaded) < timer.sParse)
+    timer.sParse = (timer.tParsed - timer.tLoaded);
+  if ((timer.tEnd - timer.tStart) < timer.sTotal)
+    timer.sTotal = (timer.tEnd - timer.tStart);
+  
+  ++test.Run; 
+  if (test.Run > test.Runs) {
+    test.Run = 1;
+    ++test.Test;
+    console.log(timer.sLoad + "," + timer.sParse + "," + timer.sTotal);
+    timer.sLoad = 9999;timer.sParse = 9999;timer.sTotal = 9999;
+  }
+  if (test.Test <= test.Tests & test.Run <= test.Runs)
+    testStart();
+  else
+    console.log("Completed");
+}
+
+function testPerformance() {
+  testStart();
+}
+
+testPerformance();
