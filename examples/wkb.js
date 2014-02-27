@@ -10,7 +10,7 @@ goog.require('ol.source.MapQuestOSM');
 goog.require('ol.source.Vector');
 
 // WKB data as array of bytes. Can be Base64 encoded.
-var encodedWKB =
+var WKB =
     'AQYAAAACAAAAAQMAAAABAAAAHgAAAP7UeOmmoGVAZan1fqN1RMCyDkdX6adlQAGnd/F' +
     '+qkTAVWr2QKu+ZUDTFWwjnnZEwEZ9kjvsx2VAER5tHLGsRMAAcOzZ88dlQEXURJ+P4k' +
     'TArTWU2gu8ZUCp+Sr52B1FwFrwoq8gp2VASvCGNCp8RcAlrfiGwpZlQLxYGCKnr0XAg' +
@@ -34,12 +34,17 @@ var encodedWKB =
     'rBxankHA9mIoJ1qUZUDXijbHuUNBwFr2JLA5oGVAZcbbSq85QcA1C7Q7pLFlQEVlw5r' +
     'KgEHAJLTlXIrKZUACnN7F+6FBwHL75ZOV02VApBgg0QQUQsA=';
 // Convert Base64 encoded string to array of bytes:
-// (not necessary as parser automatically decodes if Base64 detected).
-var decodedWKB = window.atob(encodedWKB);
-var WKB = [];
-for (var i = 0; i < decodedWKB.length; ++i) {
-  WKB.push(decodedWKB.charCodeAt(i));
+// (Not necessary as parser automatically decodes if Base64 detected).
+function decodeBase64(sB64) {
+  var data = [];
+  var decoded = window.atob(sB64);
+  for (var i = 0; i < decoded.length; ++i) {
+    data.push(decoded.charCodeAt(i));
+  }
+  return new Uint8Array(data);
 }
+WKB = decodeBase64(WKB);
+
 
 var raster = new ol.layer.Tile({
   source: new ol.source.MapQuestOSM()

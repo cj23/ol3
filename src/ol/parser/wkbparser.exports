@@ -1,0 +1,5 @@
+@exportSymbol ol.parser.WKB
+@exportProperty ol.parser.WKB.prototype.read
+@exportProperty ol.parser.WKB.prototype.write
+@exportProperty ol.parser.WKB.read
+@exportProperty ol.parser.WKB.write
